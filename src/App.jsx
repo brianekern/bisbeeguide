@@ -1,0 +1,326 @@
+import { useState, useEffect } from "react";
+import { supabase } from "./supabase";
+
+const FONT_DISPLAY = "'Playfair Display', Georgia, serif";
+const FONT_BODY = "'Libre Baskerville', Georgia, serif";
+const FONT_MONO = "'DM Mono', monospace";
+
+const COLORS = {
+  terracotta: "#C1673A", terracottaDark: "#9E4E28", terracottaLight: "#E8A07A",
+  sand: "#F2E8D9", sandDark: "#DDD0BA", turquoise: "#2A8A8A",
+  turquoiseDark: "#1D6363", turquoiseLight: "#5BB8B8",
+  bark: "#4A3728", cream: "#FAF6F0", dusk: "#7A5C4A", sage: "#8A9E6A",
+};
+
+const NEIGHBORHOODS = [
+  { name: "Old Bisbee", color: COLORS.terracotta, desc: "The historic heart — galleries, cafes, Victorian architecture climbing the canyon walls." },
+  { name: "Brewery Gulch", color: COLORS.turquoise, desc: "Once the wildest street in the Southwest. Now home to bars, the Copper Queen Mine, and music." },
+  { name: "Lowell", color: COLORS.sage, desc: "Route 66-era strip with murals, vintage shops, and a beloved drive-in diner." },
+  { name: "Warren", color: COLORS.dusk, desc: "Quiet residential neighborhood with tree-lined streets and historic ballpark." },
+  { name: "Tombstone Canyon", color: COLORS.terracottaDark, desc: "A steep winding canyon road lined with historic homes and sweeping views." },
+];
+
+const DAYS = ["today","monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+const CATEGORIES = ["Tour","Music","Market","Art","Nightlife","Wellness","Food","Community"];
+const BULLETIN_CATEGORIES = ["Special","Event","Announcement","Popup"];
+
+const categoryColor = (cat) => {
+  const map = {
+    Tour: COLORS.terracotta, Music: COLORS.turquoise, Market: COLORS.sage,
+    Art: COLORS.dusk, Nightlife: COLORS.bark, Wellness: COLORS.turquoiseDark,
+    Food: COLORS.terracottaDark, Community: COLORS.sandDark,
+    Special: COLORS.terracotta, Event: COLORS.turquoise,
+    Announcement: COLORS.sage, Popup: COLORS.dusk,
+  };
+  return map[cat] || COLORS.bark;
+};
+
+export default function BisbeeApp() {
+  const [view, setView] = useState("visitor");
+  const [visitorTab, setVisitorTab] = useState("today");
+  const [adminTab, setAdminTab] = useState("bulletin");
+  const [events, setEvents] = useState([]);
+  const [bulletins, setBulletins] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [adminUser, setAdminUser] = useState(null);
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [loginError, setLoginError] = useState("");
+  const [newBulletin, setNewBulletin] = useState({ message: "", category: "Special" });
+  const [newEvent, setNewEvent] = useState({ title: "", time: "", day: "today", category: "Community", location: "", description: "" });
+  const [editBulletin, setEditBulletin] = useState(null);
+
+  useEffect(() => { fetchEvents(); fetchBulletins(); }, []);
+
+  const fetchEvents = async () => {
+    const { data, error } = await supabase.from("events").select("*").order("created_at", { ascending: false });
+    if (!error) setEvents(data || []);
+    setLoading(false);
+  };
+
+  const fetchBulletins = async () => {
+    const { data, error } = await supabase.from("bulletins").select("*").order("created_at", { ascending: false });
+    if (!error) setBulletins(data || []);
+  };
+
+  const handleLogin = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email: loginForm.email, password: loginForm.password });
+    if (error) { setLoginError("Invalid credentials."); return; }
+    const { data: biz } = await supabase.from("businesses").select("*").eq("id", data.user.id).single();
+    setAdminUser({ id: data.user.id, name: biz?.name || "Business" });
+    setLoginError("");
+  };
+
+  const handleLogout = async () => { await supabase.auth.signOut(); setAdminUser(null); };
+
+  const postBulletin = async () => {
+    if (!newBulletin.message.trim()) return;
+    if (editBulletin) {
+      await supabase.from("bulletins").update({ message: newBulletin.message, category: newBulletin.category }).eq("id", editBulletin);
+      setEditBulletin(null);
+    } else {
+      await supabase.from("bulletins").insert({ business_id: adminUser.id, business_name: adminUser.name, category: newBulletin.category, message: newBulletin.message });
+    }
+    setNewBulletin({ message: "", category: "Special" });
+    fetchBulletins();
+  };
+
+  const deleteBulletin = async (id) => { await supabase.from("bulletins").delete().eq("id", id); fetchBulletins(); };
+
+  const postEvent = async () => {
+    if (!newEvent.title.trim()) return;
+    await supabase.from("events").insert({ ...newEvent, business_id: adminUser.id });
+    setNewEvent({ title: "", time: "", day: "today", category: "Community", location: "", description: "" });
+    fetchEvents();
+  };
+
+  const s = {
+    app: { fontFamily: FONT_BODY, background: COLORS.cream, minHeight: "100vh", color: COLORS.bark },
+    header: { background: COLORS.terracotta, position: "relative", overflow: "hidden" },
+    headerPattern: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: `repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 12px)`, zIndex: 1, pointerEvents: "none" },
+    headerInner: { padding: "32px 24px 24px", position: "relative", zIndex: 2 },
+    headerTitle: { fontFamily: FONT_DISPLAY, fontSize: "2.4rem", color: COLORS.sand, margin: 0, fontWeight: 700, letterSpacing: "-0.5px", lineHeight: 1.1 },
+    headerSub: { fontFamily: FONT_MONO, fontSize: "0.7rem", color: COLORS.terracottaLight, letterSpacing: "0.2em", textTransform: "uppercase", marginTop: "6px" },
+    navBar: { display: "flex", background: COLORS.terracottaDark, borderBottom: `3px solid ${COLORS.bark}` },
+    navBtn: (a) => ({ fontFamily: FONT_MONO, fontSize: "0.72rem", letterSpacing: "0.12em", textTransform: "uppercase", padding: "12px 20px", border: "none", background: a ? COLORS.bark : "transparent", color: a ? COLORS.sand : COLORS.terracottaLight, cursor: "pointer" }),
+    tabBar: { display: "flex", overflowX: "auto", background: COLORS.sandDark, borderBottom: `2px solid ${COLORS.terracotta}`, padding: "0 12px" },
+    tabBtn: (a) => ({ fontFamily: FONT_MONO, fontSize: "0.68rem", letterSpacing: "0.1em", textTransform: "uppercase", padding: "10px 14px", border: "none", background: "transparent", color: a ? COLORS.terracotta : COLORS.dusk, borderBottom: a ? `3px solid ${COLORS.terracotta}` : "3px solid transparent", cursor: "pointer", whiteSpace: "nowrap", fontWeight: a ? 700 : 400 }),
+    section: { padding: "20px 16px", maxWidth: "720px", margin: "0 auto" },
+    sectionTitle: { fontFamily: FONT_DISPLAY, fontSize: "1.5rem", color: COLORS.terracottaDark, marginBottom: "16px", fontWeight: 700, borderBottom: `1px solid ${COLORS.sandDark}`, paddingBottom: "8px" },
+    card: { background: "#fff", borderRadius: "4px", padding: "16px", marginBottom: "12px", boxShadow: `2px 2px 0 ${COLORS.sandDark}`, border: `1px solid ${COLORS.sandDark}` },
+    eventCard: { background: "#fff", borderRadius: "4px", marginBottom: "12px", boxShadow: `2px 2px 0 ${COLORS.sandDark}`, border: `1px solid ${COLORS.sandDark}`, overflow: "hidden", display: "flex" },
+    eventStripe: (cat) => ({ width: "5px", background: categoryColor(cat), flexShrink: 0 }),
+    eventBody: { padding: "14px 16px", flex: 1 },
+    tag: (cat) => ({ display: "inline-block", fontFamily: FONT_MONO, fontSize: "0.62rem", letterSpacing: "0.1em", textTransform: "uppercase", background: categoryColor(cat), color: "#fff", padding: "2px 8px", borderRadius: "2px", marginBottom: "6px" }),
+    eventTitle: { fontFamily: FONT_DISPLAY, fontSize: "1.05rem", fontWeight: 700, color: COLORS.bark, margin: "4px 0" },
+    eventMeta: { fontFamily: FONT_MONO, fontSize: "0.68rem", color: COLORS.dusk, marginBottom: "6px" },
+    eventDesc: { fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.5 },
+    bulletinCard: (cat) => ({ background: COLORS.sand, borderRadius: "4px", padding: "14px 16px", marginBottom: "10px", border: `1px solid ${COLORS.sandDark}`, borderLeft: `5px solid ${categoryColor(cat)}` }),
+    bulletinBiz: { fontFamily: FONT_DISPLAY, fontSize: "1rem", fontWeight: 700, color: COLORS.terracottaDark },
+    bulletinMsg: { fontSize: "0.88rem", color: COLORS.bark, marginTop: "4px", lineHeight: 1.5 },
+    input: { width: "100%", padding: "10px 12px", borderRadius: "3px", border: `1px solid ${COLORS.sandDark}`, fontFamily: FONT_BODY, fontSize: "0.88rem", background: COLORS.cream, color: COLORS.bark, marginBottom: "10px", boxSizing: "border-box" },
+    select: { padding: "10px 12px", borderRadius: "3px", border: `1px solid ${COLORS.sandDark}`, fontFamily: FONT_MONO, fontSize: "0.75rem", background: COLORS.cream, color: COLORS.bark, marginBottom: "10px", marginRight: "8px" },
+    btn: (color = COLORS.terracotta) => ({ background: color, color: "#fff", border: "none", padding: "10px 20px", borderRadius: "3px", fontFamily: FONT_MONO, fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", marginRight: "8px" }),
+    btnOutline: { background: "transparent", color: COLORS.terracotta, border: `1px solid ${COLORS.terracotta}`, padding: "8px 14px", borderRadius: "3px", fontFamily: FONT_MONO, fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase", cursor: "pointer", marginRight: "6px" },
+    loginBox: { maxWidth: "360px", margin: "60px auto", background: "#fff", borderRadius: "4px", padding: "32px", boxShadow: `4px 4px 0 ${COLORS.sandDark}`, border: `1px solid ${COLORS.sandDark}` },
+    errorMsg: { color: COLORS.terracotta, fontFamily: FONT_MONO, fontSize: "0.72rem", marginBottom: "10px" },
+    neighborhoodCard: (color) => ({ background: "#fff", borderRadius: "4px", padding: "14px 16px", marginBottom: "10px", borderLeft: `6px solid ${color}`, boxShadow: `2px 2px 0 ${COLORS.sandDark}` }),
+    welcomeBox: { background: COLORS.turquoise, color: "#fff", borderRadius: "4px", padding: "20px", marginBottom: "20px" },
+    emptyState: { color: COLORS.dusk, fontFamily: FONT_MONO, fontSize: "0.75rem", padding: "20px 0" },
+  };
+
+  const renderToday = () => (
+    <div style={s.section}>
+      <div style={s.sectionTitle}>Today in Bisbee</div>
+      {loading && <div style={s.emptyState}>Loading...</div>}
+      {!loading && events.filter(e => e.day === "today").length === 0 && <div style={s.emptyState}>No events posted for today yet.</div>}
+      {events.filter(e => e.day === "today").map(e => (
+        <div key={e.id} style={s.eventCard}>
+          <div style={s.eventStripe(e.category)} />
+          <div style={s.eventBody}>
+            <div style={s.tag(e.category)}>{e.category}</div>
+            <div style={s.eventTitle}>{e.title}</div>
+            <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
+            <div style={s.eventDesc}>{e.description}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderCalendar = () => (
+    <div style={s.section}>
+      <div style={s.sectionTitle}>This Week</div>
+      {["monday","tuesday","wednesday","thursday","friday","saturday","sunday"].map(day => (
+        <div key={day} style={{ marginBottom: "20px" }}>
+          <div style={{ fontFamily: FONT_MONO, fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", color: COLORS.turquoise, marginBottom: "8px", borderBottom: `1px dashed ${COLORS.sandDark}`, paddingBottom: "4px" }}>{day}</div>
+          {events.filter(e => e.day === day).length === 0 && <div style={{ color: COLORS.sandDark, fontFamily: FONT_MONO, fontSize: "0.72rem" }}>— Nothing posted yet</div>}
+          {events.filter(e => e.day === day).map(e => (
+            <div key={e.id} style={s.eventCard}>
+              <div style={s.eventStripe(e.category)} />
+              <div style={s.eventBody}>
+                <div style={s.tag(e.category)}>{e.category}</div>
+                <div style={s.eventTitle}>{e.title}</div>
+                <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderBulletins = () => (
+    <div style={s.section}>
+      <div style={s.sectionTitle}>Business Bulletins</div>
+      {bulletins.length === 0 && <div style={s.emptyState}>No bulletins posted yet.</div>}
+      {bulletins.map(b => (
+        <div key={b.id} style={s.bulletinCard(b.category)}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div style={s.bulletinBiz}>{b.business_name}</div>
+            <div style={s.tag(b.category)}>{b.category}</div>
+          </div>
+          <div style={s.bulletinMsg}>{b.message}</div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderAbout = () => (
+    <div style={s.section}>
+      <div style={s.welcomeBox}>
+        <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.6rem", fontWeight: 700, marginBottom: "10px" }}>Welcome to Bisbee, Arizona</div>
+        <div style={{ fontSize: "0.9rem", lineHeight: 1.7, opacity: 0.95 }}>Tucked into the Mule Mountains of Cochise County at 5,300 feet, Bisbee is one of the most distinctive small towns in the American Southwest — a former copper mining boomtown turned arts enclave, perched above the Mexican border in the heart of the sky islands.</div>
+      </div>
+      {[
+        { title: "Getting Here", body: "Bisbee is 90 miles southeast of Tucson via I-10 and Hwy 80. The nearest commercial airports are Tucson International (TUS) and Douglas Municipal. No public transit — a car is essential in this terrain." },
+        { title: "Elevation & Climate", body: "At 5,300 ft, Bisbee stays significantly cooler than Tucson or Phoenix. Summers are mild with monsoon rains July–September. Winters can bring frost and occasional snow. Spring and fall are ideal." },
+        { title: "The Sky Islands", body: "Bisbee sits within one of North America's most biodiverse regions. The sky islands support remarkable wildlife: hummingbirds, coatis, javelinas, black bears, and some of the darkest night skies in the continental US." },
+      ].map(item => (
+        <div key={item.title} style={s.card}>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "8px" }}>{item.title}</div>
+          <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.6 }}>{item.body}</div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderNeighborhoods = () => (
+    <div style={s.section}>
+      <div style={s.sectionTitle}>Neighborhoods</div>
+      {NEIGHBORHOODS.map(n => (
+        <div key={n.name} style={s.neighborhoodCard(n.color)}>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", fontWeight: 700, color: COLORS.bark, marginBottom: "4px" }}>{n.name}</div>
+          <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.5 }}>{n.desc}</div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderLogin = () => (
+    <div style={s.loginBox}>
+      <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "4px" }}>Business Portal</div>
+      <div style={{ fontFamily: FONT_MONO, fontSize: "0.68rem", color: COLORS.dusk, marginBottom: "20px", letterSpacing: "0.08em" }}>POST BULLETINS · SUBMIT EVENTS</div>
+      {loginError && <div style={s.errorMsg}>{loginError}</div>}
+      <input style={s.input} placeholder="Email" type="email" value={loginForm.email} onChange={e => setLoginForm({ ...loginForm, email: e.target.value })} />
+      <input style={s.input} placeholder="Password" type="password" value={loginForm.password} onChange={e => setLoginForm({ ...loginForm, password: e.target.value })} onKeyDown={e => e.key === "Enter" && handleLogin()} />
+      <button style={s.btn()} onClick={handleLogin}>Sign In</button>
+      <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "12px" }}>Contact the administrator to get your business listed.</div>
+    </div>
+  );
+
+  const renderAdmin = () => (
+    <div style={s.section}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <div>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.3rem", fontWeight: 700, color: COLORS.terracottaDark }}>{adminUser.name}</div>
+          <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, letterSpacing: "0.08em" }}>BUSINESS DASHBOARD</div>
+        </div>
+        <button style={s.btnOutline} onClick={handleLogout}>Sign Out</button>
+      </div>
+      <div style={{ display: "flex", marginBottom: "20px", borderBottom: `2px solid ${COLORS.sandDark}` }}>
+        {[["bulletin","Post Bulletin"],["event","Submit Event"],["manage","My Posts"]].map(([id,label]) => (
+          <button key={id} style={s.tabBtn(adminTab === id)} onClick={() => setAdminTab(id)}>{label}</button>
+        ))}
+      </div>
+      {adminTab === "bulletin" && (
+        <div style={s.card}>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", color: COLORS.terracottaDark, marginBottom: "12px", fontWeight: 700 }}>{editBulletin ? "Edit Bulletin" : "New Bulletin"}</div>
+          <select style={s.select} value={newBulletin.category} onChange={e => setNewBulletin({ ...newBulletin, category: e.target.value })}>
+            {BULLETIN_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+          </select>
+          <textarea style={{ ...s.input, height: "90px", resize: "vertical" }} placeholder="Today's special, popup event, or announcement..." value={newBulletin.message} onChange={e => setNewBulletin({ ...newBulletin, message: e.target.value })} />
+          <button style={s.btn()} onClick={postBulletin}>{editBulletin ? "Update" : "Post Bulletin"}</button>
+          {editBulletin && <button style={s.btn(COLORS.dusk)} onClick={() => { setEditBulletin(null); setNewBulletin({ message: "", category: "Special" }); }}>Cancel</button>}
+        </div>
+      )}
+      {adminTab === "event" && (
+        <div style={s.card}>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", color: COLORS.terracottaDark, marginBottom: "12px", fontWeight: 700 }}>Submit an Event</div>
+          <input style={s.input} placeholder="Event title" value={newEvent.title} onChange={e => setNewEvent({ ...newEvent, title: e.target.value })} />
+          <div style={{ display: "flex", gap: "8px" }}>
+            <input style={{ ...s.input, flex: 1 }} placeholder="Time (e.g. 7:00 PM)" value={newEvent.time} onChange={e => setNewEvent({ ...newEvent, time: e.target.value })} />
+            <select style={{ ...s.select, flex: 1 }} value={newEvent.day} onChange={e => setNewEvent({ ...newEvent, day: e.target.value })}>
+              {DAYS.map(d => <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>)}
+            </select>
+          </div>
+          <input style={s.input} placeholder="Location / Venue" value={newEvent.location} onChange={e => setNewEvent({ ...newEvent, location: e.target.value })} />
+          <select style={s.select} value={newEvent.category} onChange={e => setNewEvent({ ...newEvent, category: e.target.value })}>
+            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+          </select>
+          <textarea style={{ ...s.input, height: "70px", resize: "vertical" }} placeholder="Brief description..." value={newEvent.description} onChange={e => setNewEvent({ ...newEvent, description: e.target.value })} />
+          <button style={s.btn(COLORS.turquoise)} onClick={postEvent}>Submit Event</button>
+        </div>
+      )}
+      {adminTab === "manage" && (
+        <div>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", color: COLORS.terracottaDark, marginBottom: "12px", fontWeight: 700 }}>Your Active Bulletins</div>
+          {bulletins.filter(b => b.business_id === adminUser.id).length === 0 && <div style={s.emptyState}>No bulletins posted yet.</div>}
+          {bulletins.filter(b => b.business_id === adminUser.id).map(b => (
+            <div key={b.id} style={s.bulletinCard(b.category)}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div style={s.tag(b.category)}>{b.category}</div>
+                <div>
+                  <button style={s.btnOutline} onClick={() => { setEditBulletin(b.id); setNewBulletin({ message: b.message, category: b.category }); setAdminTab("bulletin"); }}>Edit</button>
+                  <button style={{ ...s.btnOutline, color: COLORS.terracotta, borderColor: COLORS.terracotta }} onClick={() => deleteBulletin(b.id)}>Delete</button>
+                </div>
+              </div>
+              <div style={s.bulletinMsg}>{b.message}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div style={s.app}>
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      <div style={s.header}>
+        <div style={s.headerPattern} />
+        <div style={s.headerInner}>
+          <div style={s.headerTitle}>Bisbee, Arizona</div>
+          <div style={s.headerSub}>Sky Islands · Copper Country · 5,300 ft</div>
+        </div>
+        <div style={s.navBar}>
+          <button style={s.navBtn(view === "visitor")} onClick={() => setView("visitor")}>🗺 Visitor Guide</button>
+          <button style={s.navBtn(view === "admin")} onClick={() => setView("admin")}>🏪 Business Portal</button>
+        </div>
+      </div>
+      {view === "visitor" && (
+        <div>
+          <div style={s.tabBar}>
+            {[["today","Today"],["calendar","This Week"],["bulletins","Bulletins"],["about","About"],["map","Neighborhoods"]].map(([id,label]) => (
+              <button key={id} style={s.tabBtn(visitorTab === id)} onClick={() => setVisitorTab(id)}>{label}</button>
+            ))}
+          </div>
+          {visitorTab === "today" && renderToday()}
+          {visitorTab === "calendar" && renderCalendar()}
+          {visitorTab === "bulletins" && renderBulletins()}
+          {visitorTab === "about" && renderAbout()}
+          {visitorTab === "map" && renderNeighborhoods()}
+        </div>
+      )}
+      {view === "admin" && (adminUser ? renderAdmin() : renderLogin())}
+    </div>
+  );
+}
