@@ -25,14 +25,14 @@ const CATEGORIES = ["Tour","Music","Market","Art","Nightlife","Wellness","Food",
 const BULLETIN_CATEGORIES = ["Special","Event","Announcement","Popup"];
 
 const YELP_LINKS = [
-  { label: "Breakfast", url: "https://www.yelp.com/search?find_desc=Breakfast&find_loc=Bisbee+AZ" },
-  { label: "Coffee", url: "https://www.yelp.com/search?find_desc=Coffee&find_loc=Bisbee+AZ" },
-  { label: "Lunch", url: "https://www.yelp.com/search?find_desc=Lunch&find_loc=Bisbee+AZ" },
-  { label: "Dinner", url: "https://www.yelp.com/search?find_desc=Dinner&find_loc=Bisbee+AZ" },
-  { label: "Bars", url: "https://www.yelp.com/search?find_desc=Bars&find_loc=Bisbee+AZ" },
-  { label: "Shopping", url: "https://www.yelp.com/search?find_desc=Shopping&find_loc=Bisbee+AZ" },
-  { label: "Art Galleries", url: "https://www.yelp.com/search?find_desc=Art+Galleries&find_loc=Bisbee+AZ" },
-  { label: "Hotels", url: "https://www.yelp.com/search?find_desc=Hotels&find_loc=Bisbee+AZ" },
+  { label: "Breakfast", url: "https://www.google.com/maps/search/breakfast+in+Bisbee+AZ" },
+  { label: "Coffee", url: "https://www.google.com/maps/search/coffee+in+Bisbee+AZ" },
+  { label: "Lunch", url: "https://www.google.com/maps/search/lunch+in+Bisbee+AZ" },
+  { label: "Dinner", url: "https://www.google.com/maps/search/dinner+in+Bisbee+AZ" },
+  { label: "Bars", url: "https://www.google.com/maps/search/bars+in+Bisbee+AZ" },
+  { label: "Shopping", url: "https://www.google.com/maps/search/shopping+in+Bisbee+AZ" },
+  { label: "Art Galleries", url: "https://www.google.com/maps/search/art+galleries+in+Bisbee+AZ" },
+  { label: "Hotels", url: "https://www.google.com/maps/search/hotels+in+Bisbee+AZ" },
 ];
 
 const categoryColor = (cat) => {
@@ -229,7 +229,7 @@ export default function BisbeeApp() {
           <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.6 }}>{item.body}</div>
         </div>
       ))}
-      <div style={s.sectionTitle}>Find Food & Drink</div>
+      <div style={s.sectionTitle}>Explore Bisbee</div>
       <div style={{ marginBottom: "20px" }}>
         {YELP_LINKS.map(link => (
           <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={s.yelpBtn}>{link.label}</a>
