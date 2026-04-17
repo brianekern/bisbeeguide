@@ -7,11 +7,11 @@
   "background_color": "#FAF6F0",
   "theme_color": "#C1673A",
   "icons": [
-    {
-      "src": "/icons.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+  {
+    "src": "/icon.svg",
+    "sizes": "any",
+    "type": "image/svg+xml",
+    "purpose": "any maskable"
+  }
+]
 }
