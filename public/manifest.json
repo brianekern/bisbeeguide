@@ -1,0 +1,17 @@
+{
+  "name": "Bisbee Guide",
+  "short_name": "Bisbee",
+  "description": "Your digital town square for Bisbee, Arizona",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF6F0",
+  "theme_color": "#C1673A",
+  "icons": [
+    {
+      "src": "/icons.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
