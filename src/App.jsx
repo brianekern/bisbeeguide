@@ -13,26 +13,37 @@ const COLORS = {
 };
 
 const NEIGHBORHOODS = [
-  { name: "Old Bisbee", color: COLORS.terracotta, desc: "The historic heart — galleries, cafes, Victorian architecture climbing the canyon walls." },
-  { name: "Brewery Gulch", color: COLORS.turquoise, desc: "Once the wildest street in the Southwest. Now home to bars, the Copper Queen Mine, and music." },
-  { name: "Lowell", color: COLORS.sage, desc: "Route 66-era strip with murals, vintage shops, and a beloved drive-in diner." },
-  { name: "Warren", color: COLORS.dusk, desc: "Quiet residential neighborhood with tree-lined streets and historic ballpark." },
-  { name: "Tombstone Canyon", color: COLORS.terracottaDark, desc: "A steep winding canyon road lined with historic homes and sweeping views." },
+  { name: "Old Bisbee", color: "#C1673A", desc: "The historic heart — galleries, cafes, Victorian architecture climbing the canyon walls." },
+  { name: "Brewery Gulch", color: "#2A8A8A", desc: "Once the wildest street in the Southwest. Now home to bars, the Copper Queen Mine, and music." },
+  { name: "Lowell", color: "#8A9E6A", desc: "Route 66-era strip with murals, vintage shops, and a beloved drive-in diner." },
+  { name: "Warren", color: "#7A5C4A", desc: "Quiet residential neighborhood with tree-lined streets and historic ballpark." },
+  { name: "Tombstone Canyon", color: "#9E4E28", desc: "A steep winding canyon road lined with historic homes and sweeping views." },
 ];
 
 const DAYS = ["today","monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
 const CATEGORIES = ["Tour","Music","Market","Art","Nightlife","Wellness","Food","Community"];
 const BULLETIN_CATEGORIES = ["Special","Event","Announcement","Popup"];
 
+const YELP_LINKS = [
+  { label: "Breakfast", url: "https://www.yelp.com/search?find_desc=Breakfast&find_loc=Bisbee+AZ" },
+  { label: "Coffee", url: "https://www.yelp.com/search?find_desc=Coffee&find_loc=Bisbee+AZ" },
+  { label: "Lunch", url: "https://www.yelp.com/search?find_desc=Lunch&find_loc=Bisbee+AZ" },
+  { label: "Dinner", url: "https://www.yelp.com/search?find_desc=Dinner&find_loc=Bisbee+AZ" },
+  { label: "Bars", url: "https://www.yelp.com/search?find_desc=Bars&find_loc=Bisbee+AZ" },
+  { label: "Shopping", url: "https://www.yelp.com/search?find_desc=Shopping&find_loc=Bisbee+AZ" },
+  { label: "Art Galleries", url: "https://www.yelp.com/search?find_desc=Art+Galleries&find_loc=Bisbee+AZ" },
+  { label: "Hotels", url: "https://www.yelp.com/search?find_desc=Hotels&find_loc=Bisbee+AZ" },
+];
+
 const categoryColor = (cat) => {
   const map = {
-    Tour: COLORS.terracotta, Music: COLORS.turquoise, Market: COLORS.sage,
-    Art: COLORS.dusk, Nightlife: COLORS.bark, Wellness: COLORS.turquoiseDark,
-    Food: COLORS.terracottaDark, Community: COLORS.sandDark,
-    Special: COLORS.terracotta, Event: COLORS.turquoise,
-    Announcement: COLORS.sage, Popup: COLORS.dusk,
+    Tour: "#C1673A", Music: "#2A8A8A", Market: "#8A9E6A",
+    Art: "#7A5C4A", Nightlife: "#4A3728", Wellness: "#1D6363",
+    Food: "#9E4E28", Community: "#DDD0BA",
+    Special: "#C1673A", Event: "#2A8A8A",
+    Announcement: "#8A9E6A", Popup: "#7A5C4A",
   };
-  return map[cat] || COLORS.bark;
+  return map[cat] || "#4A3728";
 };
 
 export default function BisbeeApp() {
@@ -45,6 +56,10 @@ export default function BisbeeApp() {
   const [adminUser, setAdminUser] = useState(null);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState("");
+  const [showSignup, setShowSignup] = useState(false);
+  const [signupForm, setSignupForm] = useState({ name: "", email: "", password: "", category: "Business" });
+  const [signupError, setSignupError] = useState("");
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const [newBulletin, setNewBulletin] = useState({ message: "", category: "Special" });
   const [newEvent, setNewEvent] = useState({ title: "", time: "", day: "today", category: "Community", location: "", description: "" });
   const [editBulletin, setEditBulletin] = useState(null);
@@ -71,6 +86,18 @@ export default function BisbeeApp() {
   };
 
   const handleLogout = async () => { await supabase.auth.signOut(); setAdminUser(null); };
+
+  const handleSignup = async () => {
+    if (!signupForm.name.trim() || !signupForm.email.trim() || !signupForm.password.trim()) {
+      setSignupError("Please fill in all fields.");
+      return;
+    }
+    const { data, error } = await supabase.auth.signUp({ email: signupForm.email, password: signupForm.password });
+    if (error) { setSignupError(error.message); return; }
+    await supabase.from("businesses").insert({ id: data.user.id, name: signupForm.name, email: signupForm.email, category: signupForm.category });
+    setSignupSuccess(true);
+    setSignupError("");
+  };
 
   const postBulletin = async () => {
     if (!newBulletin.message.trim()) return;
@@ -126,6 +153,7 @@ export default function BisbeeApp() {
     neighborhoodCard: (color) => ({ background: "#fff", borderRadius: "4px", padding: "14px 16px", marginBottom: "10px", borderLeft: `6px solid ${color}`, boxShadow: `2px 2px 0 ${COLORS.sandDark}` }),
     welcomeBox: { background: COLORS.turquoise, color: "#fff", borderRadius: "4px", padding: "20px", marginBottom: "20px" },
     emptyState: { color: COLORS.dusk, fontFamily: FONT_MONO, fontSize: "0.75rem", padding: "20px 0" },
+    yelpBtn: { display: "inline-block", fontFamily: FONT_MONO, fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", padding: "10px 16px", borderRadius: "3px", background: COLORS.sand, border: `1px solid ${COLORS.sandDark}`, color: COLORS.bark, cursor: "pointer", marginRight: "8px", marginBottom: "8px", textDecoration: "none" },
   };
 
   const renderToday = () => (
@@ -201,6 +229,12 @@ export default function BisbeeApp() {
           <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.6 }}>{item.body}</div>
         </div>
       ))}
+      <div style={s.sectionTitle}>Find Food & Drink</div>
+      <div style={{ marginBottom: "20px" }}>
+        {YELP_LINKS.map(link => (
+          <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={s.yelpBtn}>{link.label}</a>
+        ))}
+      </div>
     </div>
   );
 
@@ -218,13 +252,42 @@ export default function BisbeeApp() {
 
   const renderLogin = () => (
     <div style={s.loginBox}>
-      <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "4px" }}>Business Portal</div>
-      <div style={{ fontFamily: FONT_MONO, fontSize: "0.68rem", color: COLORS.dusk, marginBottom: "20px", letterSpacing: "0.08em" }}>POST BULLETINS · SUBMIT EVENTS</div>
-      {loginError && <div style={s.errorMsg}>{loginError}</div>}
-      <input style={s.input} placeholder="Email" type="email" value={loginForm.email} onChange={e => setLoginForm({ ...loginForm, email: e.target.value })} />
-      <input style={s.input} placeholder="Password" type="password" value={loginForm.password} onChange={e => setLoginForm({ ...loginForm, password: e.target.value })} onKeyDown={e => e.key === "Enter" && handleLogin()} />
-      <button style={s.btn()} onClick={handleLogin}>Sign In</button>
-      <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "12px" }}>Contact the administrator to get your business listed.</div>
+      {showSignup ? (
+        <>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "4px" }}>Create Account</div>
+          <div style={{ fontFamily: FONT_MONO, fontSize: "0.68rem", color: COLORS.dusk, marginBottom: "20px", letterSpacing: "0.08em" }}>BUSINESS · ARTIST · VENDOR</div>
+          {signupSuccess ? (
+            <div style={{ fontFamily: FONT_MONO, fontSize: "0.8rem", color: COLORS.turquoise, lineHeight: 1.6 }}>
+              Account created! Check your email to confirm, then <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setShowSignup(false); setSignupSuccess(false); }}>sign in here</span>.
+            </div>
+          ) : (
+            <>
+              {signupError && <div style={s.errorMsg}>{signupError}</div>}
+              <input style={s.input} placeholder="Business or Artist Name" value={signupForm.name} onChange={e => setSignupForm({ ...signupForm, name: e.target.value })} />
+              <input style={s.input} placeholder="Email" type="email" value={signupForm.email} onChange={e => setSignupForm({ ...signupForm, email: e.target.value })} />
+              <input style={s.input} placeholder="Password" type="password" value={signupForm.password} onChange={e => setSignupForm({ ...signupForm, password: e.target.value })} />
+              <select style={{ ...s.select, width: "100%", marginRight: 0 }} value={signupForm.category} onChange={e => setSignupForm({ ...signupForm, category: e.target.value })}>
+                <option>Business</option>
+                <option>Artist</option>
+                <option>Musician</option>
+                <option>Vendor</option>
+              </select>
+              <button style={s.btn()} onClick={handleSignup}>Create Account</button>
+              <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "12px", cursor: "pointer", textDecoration: "underline" }} onClick={() => setShowSignup(false)}>Already have an account? Sign in</div>
+            </>
+          )}
+        </>
+      ) : (
+        <>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "4px" }}>Business Portal</div>
+          <div style={{ fontFamily: FONT_MONO, fontSize: "0.68rem", color: COLORS.dusk, marginBottom: "20px", letterSpacing: "0.08em" }}>POST BULLETINS · SUBMIT EVENTS</div>
+          {loginError && <div style={s.errorMsg}>{loginError}</div>}
+          <input style={s.input} placeholder="Email" type="email" value={loginForm.email} onChange={e => setLoginForm({ ...loginForm, email: e.target.value })} />
+          <input style={s.input} placeholder="Password" type="password" value={loginForm.password} onChange={e => setLoginForm({ ...loginForm, password: e.target.value })} onKeyDown={e => e.key === "Enter" && handleLogin()} />
+          <button style={s.btn()} onClick={handleLogin}>Sign In</button>
+          <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "12px", cursor: "pointer", textDecoration: "underline" }} onClick={() => setShowSignup(true)}>New to Bisbee Guide? Create an account</div>
+        </>
+      )}
     </div>
   );
 
