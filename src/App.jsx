@@ -233,7 +233,7 @@ export default function BisbeeApp() {
           <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "8px" }}>{item.title}</div>
           <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.6 }}>{item.body}</div>
         </div>
-      ))}
+      ))} </div>
   );
 
   const renderNeighborhoods = () => (
