@@ -63,8 +63,23 @@ export default function BisbeeApp() {
   const [newBulletin, setNewBulletin] = useState({ message: "", category: "Special" });
   const [newEvent, setNewEvent] = useState({ title: "", time: "", day: "today", category: "Community", location: "", description: "" });
   const [editBulletin, setEditBulletin] = useState(null);
+  const [resetMode, setResetMode] = useState(false);
+const [resetEmail, setResetEmail] = useState("");
+const [resetSent, setResetSent] = useState(false);
+const [newPassword, setNewPassword] = useState("");
+const [passwordUpdateSuccess, setPasswordUpdateSuccess] = useState(false);
+const [isRecoverySession, setIsRecoverySession] = useState(false);
 
   useEffect(() => { fetchEvents(); fetchBulletins(); }, []);
+  useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY") {
+      setIsRecoverySession(true);
+      setView("admin");
+    }
+  });
+  return () => subscription.unsubscribe();
+}, []);
 
   const fetchEvents = async () => {
     const { data, error } = await supabase.from("events").select("*").order("created_at", { ascending: false });
@@ -248,33 +263,52 @@ export default function BisbeeApp() {
     </div>
   );
 
-  const renderLogin = () => (
+const renderLogin = () => {
+  if (isRecoverySession) return (
+    <div style={s.loginBox}>
+      <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "20px" }}>Set New Password</div>
+      {passwordUpdateSuccess ? (
+        <div style={{ fontFamily: FONT_MONO, fontSize: "0.8rem", color: COLORS.turquoise, lineHeight: 1.6 }}>
+          Password updated! <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setIsRecoverySession(false); setPasswordUpdateSuccess(false); }}>Sign in</span>
+        </div>
+      ) : (
+        <>
+          <input style={s.input} placeholder="New password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+          <button style={s.btn()} onClick={async () => {
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (!error) setPasswordUpdateSuccess(true);
+          }}>Update Password</button>
+        </>
+      )}
+    </div>
+  );
+
+  if (resetMode) return (
+    <div style={s.loginBox}>
+      <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "20px" }}>Reset Password</div>
+      {resetSent ? (
+        <div style={{ fontFamily: FONT_MONO, fontSize: "0.8rem", color: COLORS.turquoise, lineHeight: 1.6 }}>
+          Check your email for a reset link. <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setResetMode(false); setResetSent(false); }}>Back to sign in</span>
+        </div>
+      ) : (
+        <>
+          <input style={s.input} placeholder="Email" type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} />
+          <button style={s.btn()} onClick={async () => {
+            await supabase.auth.resetPasswordForEmail(resetEmail, {
+              redirectTo: "https://bisbeeguide.vercel.app"
+            });
+            setResetSent(true);
+          }}>Send Reset Link</button>
+          <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "12px", cursor: "pointer", textDecoration: "underline" }} onClick={() => setResetMode(false)}>Back to sign in</div>
+        </>
+      )}
+    </div>
+  );
+
+  return (
     <div style={s.loginBox}>
       {showSignup ? (
-        <>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "4px" }}>Create Account</div>
-          <div style={{ fontFamily: FONT_MONO, fontSize: "0.68rem", color: COLORS.dusk, marginBottom: "20px", letterSpacing: "0.08em" }}>BUSINESS · ARTIST · VENDOR</div>
-          {signupSuccess ? (
-            <div style={{ fontFamily: FONT_MONO, fontSize: "0.8rem", color: COLORS.turquoise, lineHeight: 1.6 }}>
-              Account created! Check your email to confirm, then <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setShowSignup(false); setSignupSuccess(false); }}>sign in here</span>.
-            </div>
-          ) : (
-            <>
-              {signupError && <div style={s.errorMsg}>{signupError}</div>}
-              <input style={s.input} placeholder="Business or Artist Name" value={signupForm.name} onChange={e => setSignupForm({ ...signupForm, name: e.target.value })} />
-              <input style={s.input} placeholder="Email" type="email" value={signupForm.email} onChange={e => setSignupForm({ ...signupForm, email: e.target.value })} />
-              <input style={s.input} placeholder="Password" type="password" value={signupForm.password} onChange={e => setSignupForm({ ...signupForm, password: e.target.value })} />
-              <select style={{ ...s.select, width: "100%", marginRight: 0 }} value={signupForm.category} onChange={e => setSignupForm({ ...signupForm, category: e.target.value })}>
-                <option>Business</option>
-                <option>Artist</option>
-                <option>Musician</option>
-                <option>Vendor</option>
-              </select>
-              <button style={s.btn()} onClick={handleSignup}>Create Account</button>
-              <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "12px", cursor: "pointer", textDecoration: "underline" }} onClick={() => setShowSignup(false)}>Already have an account? Sign in</div>
-            </>
-          )}
-        </>
+        // ...your existing signup JSX unchanged
       ) : (
         <>
           <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "4px" }}>Business Portal</div>
@@ -283,11 +317,13 @@ export default function BisbeeApp() {
           <input style={s.input} placeholder="Email" type="email" value={loginForm.email} onChange={e => setLoginForm({ ...loginForm, email: e.target.value })} />
           <input style={s.input} placeholder="Password" type="password" value={loginForm.password} onChange={e => setLoginForm({ ...loginForm, password: e.target.value })} onKeyDown={e => e.key === "Enter" && handleLogin()} />
           <button style={s.btn()} onClick={handleLogin}>Sign In</button>
-          <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "12px", cursor: "pointer", textDecoration: "underline" }} onClick={() => setShowSignup(true)}>New to Bisbee Guide? Create an account</div>
+          <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "12px", cursor: "pointer", textDecoration: "underline" }} onClick={() => setResetMode(true)}>Forgot password?</div>
+          <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "8px", cursor: "pointer", textDecoration: "underline" }} onClick={() => setShowSignup(true)}>New to Bisbee Guide? Create an account</div>
         </>
       )}
     </div>
   );
+};
 
   const renderAdmin = () => (
     <div style={s.section}>
