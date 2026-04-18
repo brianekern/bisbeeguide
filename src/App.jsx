@@ -263,25 +263,6 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
     </div>
   );
 
-const renderLogin = () => {
-  if (isRecoverySession) return (
-    <div style={s.loginBox}>
-      <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "20px" }}>Set New Password</div>
-      {passwordUpdateSuccess ? (
-        <div style={{ fontFamily: FONT_MONO, fontSize: "0.8rem", color: COLORS.turquoise, lineHeight: 1.6 }}>
-          Password updated! <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setIsRecoverySession(false); setPasswordUpdateSuccess(false); }}>Sign in</span>
-        </div>
-      ) : (
-        <>
-          <input style={s.input} placeholder="New password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
-          <button style={s.btn()} onClick={async () => {
-            const { error } = await supabase.auth.updateUser({ password: newPassword });
-            if (!error) setPasswordUpdateSuccess(true);
-          }}>Update Password</button>
-        </>
-      )}
-    </div>
-  );
 
   const renderAdmin = () => (
   <div style={s.section}>
@@ -364,6 +345,27 @@ const renderLogin = () => {
     )}
   </div>
 );
+
+
+const renderLogin = () => {
+  if (isRecoverySession) return (
+    <div style={s.loginBox}>
+      <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "20px" }}>Set New Password</div>
+      {passwordUpdateSuccess ? (
+        <div style={{ fontFamily: FONT_MONO, fontSize: "0.8rem", color: COLORS.turquoise, lineHeight: 1.6 }}>
+          Password updated! <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setIsRecoverySession(false); setPasswordUpdateSuccess(false); }}>Sign in</span>
+        </div>
+      ) : (
+        <>
+          <input style={s.input} placeholder="New password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+          <button style={s.btn()} onClick={async () => {
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (!error) setPasswordUpdateSuccess(true);
+          }}>Update Password</button>
+        </>
+      )}
+    </div>
+  );
 
   if (resetMode) return (
     <div style={s.loginBox}>
