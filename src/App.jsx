@@ -157,23 +157,21 @@ export default function BisbeeApp() {
   };
 
   const renderToday = () => (
-    <div style={s.section}>
-      <div style={s.sectionTitle}>Today in Bisbee</div>
-      {loading && <div style={s.emptyState}>Loading...</div>}
-      {!loading && events.filter(e => e.day === "today").length === 0 && <div style={s.emptyState}>No events posted for today yet.</div>}
-      {events.filter(e => e.day === "today").map(e => (
-        <div key={e.id} style={s.eventCard}>
-          <div style={s.eventStripe(e.category)} />
-          <div style={s.eventBody}>
-            <div style={s.tag(e.category)}>{e.category}</div>
-            <div style={s.eventTitle}>{e.title}</div>
-            <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
-            <div style={s.eventDesc}>{e.description}</div>
-          </div>
-        </div>
+  <div style={s.section}>
+    <div style={s.sectionTitle}>Explore Bisbee</div>
+    <div style={{ marginBottom: "24px" }}>
+      {YELP_LINKS.map(link => (
+        <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={s.yelpBtn}>{link.label}</a>
       ))}
     </div>
-  );
+    <div style={s.sectionTitle}>Today in Bisbee</div>
+    {loading && <div style={s.emptyState}>Loading...</div>}
+    {!loading && events.filter(e => e.day === "today").length === 0 && <div style={s.emptyState}>No events posted for today yet.</div>}
+    {events.filter(e => e.day === "today").map(e => (
+      // ...same as before
+    ))}
+  </div>
+);
 
   const renderCalendar = () => (
     <div style={s.section}>
@@ -229,13 +227,6 @@ export default function BisbeeApp() {
           <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.6 }}>{item.body}</div>
         </div>
       ))}
-      <div style={s.sectionTitle}>Explore Bisbee</div>
-      <div style={{ marginBottom: "20px" }}>
-        {YELP_LINKS.map(link => (
-          <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={s.yelpBtn}>{link.label}</a>
-        ))}
-      </div>
-    </div>
   );
 
   const renderNeighborhoods = () => (
