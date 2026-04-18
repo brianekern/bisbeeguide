@@ -156,7 +156,7 @@ export default function BisbeeApp() {
     yelpBtn: { display: "inline-block", fontFamily: FONT_MONO, fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", padding: "10px 16px", borderRadius: "3px", background: COLORS.sand, border: `1px solid ${COLORS.sandDark}`, color: COLORS.bark, cursor: "pointer", marginRight: "8px", marginBottom: "8px", textDecoration: "none" },
   };
 
-  const renderToday = () => (
+ const renderToday = () => (
   <div style={s.section}>
     <div style={s.sectionTitle}>Explore Bisbee</div>
     <div style={{ marginBottom: "24px" }}>
@@ -168,11 +168,18 @@ export default function BisbeeApp() {
     {loading && <div style={s.emptyState}>Loading...</div>}
     {!loading && events.filter(e => e.day === "today").length === 0 && <div style={s.emptyState}>No events posted for today yet.</div>}
     {events.filter(e => e.day === "today").map(e => (
-      // ...same as before
+      <div key={e.id} style={s.eventCard}>
+        <div style={s.eventStripe(e.category)} />
+        <div style={s.eventBody}>
+          <div style={s.tag(e.category)}>{e.category}</div>
+          <div style={s.eventTitle}>{e.title}</div>
+          <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
+          <div style={s.eventDesc}>{e.description}</div>
+        </div>
+      </div>
     ))}
   </div>
 );
-
   const renderCalendar = () => (
     <div style={s.section}>
       <div style={s.sectionTitle}>This Week</div>
