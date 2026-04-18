@@ -348,69 +348,43 @@ const renderLogin = () => {
   );
 };
 
-  const renderAdmin = () => (
-    <div style={s.section}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <div>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.3rem", fontWeight: 700, color: COLORS.terracottaDark }}>{adminUser.name}</div>
-          <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, letterSpacing: "0.08em" }}>BUSINESS DASHBOARD</div>
-        </div>
-        <button style={s.btnOutline} onClick={handleLogout}>Sign Out</button>
-      </div>
-      <div style={{ display: "flex", marginBottom: "20px", borderBottom: `2px solid ${COLORS.sandDark}` }}>
-        {[["bulletin","Post Bulletin"],["event","Submit Event"],["manage","My Posts"]].map(([id,label]) => (
-          <button key={id} style={s.tabBtn(adminTab === id)} onClick={() => setAdminTab(id)}>{label}</button>
-        ))}
-      </div>
-      {adminTab === "bulletin" && (
-        <div style={s.card}>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", color: COLORS.terracottaDark, marginBottom: "12px", fontWeight: 700 }}>{editBulletin ? "Edit Bulletin" : "New Bulletin"}</div>
-          <select style={s.select} value={newBulletin.category} onChange={e => setNewBulletin({ ...newBulletin, category: e.target.value })}>
-            {BULLETIN_CATEGORIES.map(c => <option key={c}>{c}</option>)}
-          </select>
-          <textarea style={{ ...s.input, height: "90px", resize: "vertical" }} placeholder="Today's special, popup event, or announcement..." value={newBulletin.message} onChange={e => setNewBulletin({ ...newBulletin, message: e.target.value })} />
-          <button style={s.btn()} onClick={postBulletin}>{editBulletin ? "Update" : "Post Bulletin"}</button>
-          {editBulletin && <button style={s.btn(COLORS.dusk)} onClick={() => { setEditBulletin(null); setNewBulletin({ message: "", category: "Special" }); }}>Cancel</button>}
-        </div>
-      )}
-      {adminTab === "event" && (
-        <div style={s.card}>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", color: COLORS.terracottaDark, marginBottom: "12px", fontWeight: 700 }}>Submit an Event</div>
-          <input style={s.input} placeholder="Event title" value={newEvent.title} onChange={e => setNewEvent({ ...newEvent, title: e.target.value })} />
-          <div style={{ display: "flex", gap: "8px" }}>
-            <input style={{ ...s.input, flex: 1 }} placeholder="Time (e.g. 7:00 PM)" value={newEvent.time} onChange={e => setNewEvent({ ...newEvent, time: e.target.value })} />
-            <select style={{ ...s.select, flex: 1 }} value={newEvent.day} onChange={e => setNewEvent({ ...newEvent, day: e.target.value })}>
-              {DAYS.map(d => <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>)}
-            </select>
+  {adminTab === "manage" && (
+  <div>
+    <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", color: COLORS.terracottaDark, marginBottom: "12px", fontWeight: 700 }}>Your Active Bulletins</div>
+    {bulletins.filter(b => b.business_id === adminUser.id).length === 0 && <div style={s.emptyState}>No bulletins posted yet.</div>}
+    {bulletins.filter(b => b.business_id === adminUser.id).map(b => (
+      <div key={b.id} style={s.bulletinCard(b.category)}>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={s.tag(b.category)}>{b.category}</div>
+          <div>
+            <button style={s.btnOutline} onClick={() => { setEditBulletin(b.id); setNewBulletin({ message: b.message, category: b.category }); setAdminTab("bulletin"); }}>Edit</button>
+            <button style={{ ...s.btnOutline, color: COLORS.terracotta, borderColor: COLORS.terracotta }} onClick={() => deleteBulletin(b.id)}>Delete</button>
           </div>
-          <input style={s.input} placeholder="Location / Venue" value={newEvent.location} onChange={e => setNewEvent({ ...newEvent, location: e.target.value })} />
-          <select style={s.select} value={newEvent.category} onChange={e => setNewEvent({ ...newEvent, category: e.target.value })}>
-            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-          </select>
-          <textarea style={{ ...s.input, height: "70px", resize: "vertical" }} placeholder="Brief description..." value={newEvent.description} onChange={e => setNewEvent({ ...newEvent, description: e.target.value })} />
-          <button style={s.btn(COLORS.turquoise)} onClick={postEvent}>Submit Event</button>
         </div>
-      )}
-      {adminTab === "manage" && (
-        <div>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", color: COLORS.terracottaDark, marginBottom: "12px", fontWeight: 700 }}>Your Active Bulletins</div>
-          {bulletins.filter(b => b.business_id === adminUser.id).length === 0 && <div style={s.emptyState}>No bulletins posted yet.</div>}
-          {bulletins.filter(b => b.business_id === adminUser.id).map(b => (
-            <div key={b.id} style={s.bulletinCard(b.category)}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div style={s.tag(b.category)}>{b.category}</div>
-                <div>
-                  <button style={s.btnOutline} onClick={() => { setEditBulletin(b.id); setNewBulletin({ message: b.message, category: b.category }); setAdminTab("bulletin"); }}>Edit</button>
-                  <button style={{ ...s.btnOutline, color: COLORS.terracotta, borderColor: COLORS.terracotta }} onClick={() => deleteBulletin(b.id)}>Delete</button>
-                </div>
-              </div>
-              <div style={s.bulletinMsg}>{b.message}</div>
-            </div>
-          ))}
+        <div style={s.bulletinMsg}>{b.message}</div>
+      </div>
+    ))}
+
+    <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", color: COLORS.terracottaDark, margin: "24px 0 12px", fontWeight: 700 }}>Your Active Events</div>
+    {events.filter(e => e.business_id === adminUser.id).length === 0 && <div style={s.emptyState}>No events posted yet.</div>}
+    {events.filter(e => e.business_id === adminUser.id).map(e => (
+      <div key={e.id} style={s.eventCard}>
+        <div style={s.eventStripe(e.category)} />
+        <div style={s.eventBody}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div style={s.tag(e.category)}>{e.category}</div>
+            <button style={{ ...s.btnOutline, color: COLORS.terracotta, borderColor: COLORS.terracotta }} onClick={async () => {
+              await supabase.from("events").delete().eq("id", e.id);
+              fetchEvents();
+            }}>Delete</button>
+          </div>
+          <div style={s.eventTitle}>{e.title}</div>
+          <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location} &nbsp;·&nbsp; {e.day}</div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    ))}
+  </div>
+)}
 
   return (
     <div style={s.app}>
