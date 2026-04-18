@@ -308,7 +308,30 @@ const renderLogin = () => {
   return (
     <div style={s.loginBox}>
       {showSignup ? (
-        // ...your existing signup JSX unchanged
+        <>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "4px" }}>Create Account</div>
+          <div style={{ fontFamily: FONT_MONO, fontSize: "0.68rem", color: COLORS.dusk, marginBottom: "20px", letterSpacing: "0.08em" }}>BUSINESS · ARTIST · VENDOR</div>
+          {signupSuccess ? (
+            <div style={{ fontFamily: FONT_MONO, fontSize: "0.8rem", color: COLORS.turquoise, lineHeight: 1.6 }}>
+              Account created! Check your email to confirm, then <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setShowSignup(false); setSignupSuccess(false); }}>sign in here</span>.
+            </div>
+          ) : (
+            <>
+              {signupError && <div style={s.errorMsg}>{signupError}</div>}
+              <input style={s.input} placeholder="Business or Artist Name" value={signupForm.name} onChange={e => setSignupForm({ ...signupForm, name: e.target.value })} />
+              <input style={s.input} placeholder="Email" type="email" value={signupForm.email} onChange={e => setSignupForm({ ...signupForm, email: e.target.value })} />
+              <input style={s.input} placeholder="Password" type="password" value={signupForm.password} onChange={e => setSignupForm({ ...signupForm, password: e.target.value })} />
+              <select style={{ ...s.select, width: "100%", marginRight: 0 }} value={signupForm.category} onChange={e => setSignupForm({ ...signupForm, category: e.target.value })}>
+                <option>Business</option>
+                <option>Artist</option>
+                <option>Musician</option>
+                <option>Vendor</option>
+              </select>
+              <button style={s.btn()} onClick={handleSignup}>Create Account</button>
+              <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", color: COLORS.dusk, marginTop: "12px", cursor: "pointer", textDecoration: "underline" }} onClick={() => setShowSignup(false)}>Already have an account? Sign in</div>
+            </>
+          )}
+        </>
       ) : (
         <>
           <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.4rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "4px" }}>Business Portal</div>
