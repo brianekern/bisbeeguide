@@ -63,7 +63,7 @@ export default function BisbeeApp() {
   const [signupError, setSignupError] = useState("");
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [newBulletin, setNewBulletin] = useState({ message: "", category: "Special" });
-  const [newEvent, setNewEvent] = useState({ title: "", time: "", day: "today", category: "Community", location: "", description: "" });
+  const [newEvent, setNewEvent] = useState({ title: "", time: "", day: "today", category: "Community", location: "", description: "", url: "" });
   const [editBulletin, setEditBulletin] = useState(null);
   const [resetMode, setResetMode] = useState(false);
 const [resetEmail, setResetEmail] = useState("");
@@ -133,7 +133,7 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
   const postEvent = async () => {
     if (!newEvent.title.trim()) return;
     await supabase.from("events").insert({ ...newEvent, business_id: adminUser.id });
-    setNewEvent({ title: "", time: "", day: "today", category: "Community", location: "", description: "" });
+    setNewEvent({ title: "", time: "", day: "today", category: "Community", location: "", description: "", url: "" });
     fetchEvents();
   };
 
@@ -188,11 +188,12 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
       <div key={e.id} style={s.eventCard}>
         <div style={s.eventStripe(e.category)} />
         <div style={s.eventBody}>
-          <div style={s.tag(e.category)}>{e.category}</div>
-          <div style={s.eventTitle}>{e.title}</div>
-          <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
-          <div style={s.eventDesc}>{e.description}</div>
-        </div>
+  <div style={s.tag(e.category)}>{e.category}</div>
+  <div style={s.eventTitle}>{e.title}</div>
+  <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
+  <div style={s.eventDesc}>{e.description}</div>
+  {e.url && <a href={e.url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase", color: COLORS.turquoise, textDecoration: "none", borderBottom: `1px solid ${COLORS.turquoiseLight}`, marginTop: "8px", display: "inline-block" }}>More Info →</a>}
+</div>
       </div>
     ))}
   </div>
@@ -208,10 +209,12 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
             <div key={e.id} style={s.eventCard}>
               <div style={s.eventStripe(e.category)} />
               <div style={s.eventBody}>
-                <div style={s.tag(e.category)}>{e.category}</div>
-                <div style={s.eventTitle}>{e.title}</div>
-                <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
-              </div>
+  <div style={s.tag(e.category)}>{e.category}</div>
+  <div style={s.eventTitle}>{e.title}</div>
+  <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
+  <div style={s.eventDesc}>{e.description}</div>
+  {e.url && <a href={e.url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase", color: COLORS.turquoise, textDecoration: "none", borderBottom: `1px solid ${COLORS.turquoiseLight}`, marginTop: "8px", display: "inline-block" }}>More Info →</a>}
+</div>
             </div>
           ))}
         </div>
@@ -355,7 +358,8 @@ const renderAbout = () => (
           {CATEGORIES.map(c => <option key={c}>{c}</option>)}
         </select>
         <textarea style={{ ...s.input, height: "70px", resize: "vertical" }} placeholder="Brief description..." value={newEvent.description} onChange={e => setNewEvent({ ...newEvent, description: e.target.value })} />
-        <button style={s.btn(COLORS.turquoise)} onClick={postEvent}>Submit Event</button>
+<input style={s.input} placeholder="More info URL (optional)" value={newEvent.url} onChange={e => setNewEvent({ ...newEvent, url: e.target.value })} />
+<button style={s.btn(COLORS.turquoise)} onClick={postEvent}>Submit Event</button>
       </div>
     )}
     {adminTab === "manage" && (
