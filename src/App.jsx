@@ -26,15 +26,15 @@ const CATEGORIES = ["Tour","Music","Market","Art","Nightlife","Wellness","Food",
 const BULLETIN_CATEGORIES = ["Special","Event","Announcement","Popup"];
 
 const YELP_LINKS = [
-  { label: "Breakfast", url: "https://www.google.com/maps/search/breakfast+in+Bisbee+AZ" },
   { label: "Coffee", url: "https://www.google.com/maps/search/coffee+in+Bisbee+AZ" },
+  { label: "Breakfast", url: "https://www.google.com/maps/search/breakfast+in+Bisbee+AZ" },
   { label: "Lunch", url: "https://www.google.com/maps/search/lunch+in+Bisbee+AZ" },
   { label: "Dinner", url: "https://www.google.com/maps/search/dinner+in+Bisbee+AZ" },
+  { label: "Desserts & Sweets", url: "https://www.google.com/maps/search/desserts+sweets+bakery+in+Bisbee+AZ" },
   { label: "Bars", url: "https://www.google.com/maps/search/bars+in+Bisbee+AZ" },
   { label: "Shopping", url: "https://www.google.com/maps/search/shopping+in+Bisbee+AZ" },
   { label: "Art Galleries", url: "https://www.google.com/maps/search/art+galleries+in+Bisbee+AZ" },
   { label: "Hotels", url: "https://www.google.com/maps/search/hotels+in+Bisbee+AZ" },
-  { label: "Desserts & Sweets", url: "https://www.google.com/maps/search/desserts+sweets+bakery+in+Bisbee+AZ" },
 ];
 
 const categoryColor = (cat) => {
