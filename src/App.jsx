@@ -13,11 +13,11 @@ const COLORS = {
 };
 
 const NEIGHBORHOODS = [
-  { name: "Old Bisbee", color: "#C1673A", desc: "The historic heart — galleries, cafes, Victorian architecture climbing the canyon walls." },
-  { name: "Brewery Gulch", color: "#2A8A8A", desc: "Once the wildest street in the Southwest. Now home to bars, the Copper Queen Mine, and music." },
-  { name: "Lowell", color: "#8A9E6A", desc: "Route 66-era strip with murals, vintage shops, and a beloved drive-in diner." },
-  { name: "Warren", color: "#7A5C4A", desc: "Quiet residential neighborhood with tree-lined streets and historic ballpark." },
-  { name: "Tombstone Canyon", color: "#9E4E28", desc: "A steep winding canyon road lined with historic homes and sweeping views." },
+  { name: "Old Bisbee", color: "#C1673A", desc: "...", maps: "https://www.google.com/maps/search/Old+Bisbee+AZ" },
+  { name: "Brewery Gulch", color: "#2A8A8A", desc: "...", maps: "https://www.google.com/maps/search/Brewery+Gulch+Bisbee+AZ" },
+  { name: "Lowell", color: "#8A9E6A", desc: "...", maps: "https://www.google.com/maps/search/Lowell+Bisbee+AZ" },
+  { name: "Warren", color: "#7A5C4A", desc: "...", maps: "https://www.google.com/maps/search/Warren+Bisbee+AZ" },
+  { name: "Tombstone Canyon", color: "#9E4E28", desc: "...", maps: "https://www.google.com/maps/search/Tombstone+Canyon+Bisbee+AZ" },
 ];
 
 const DAYS = ["today","monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
@@ -252,16 +252,17 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
   );
 
   const renderNeighborhoods = () => (
-    <div style={s.section}>
-      <div style={s.sectionTitle}>Neighborhoods</div>
-      {NEIGHBORHOODS.map(n => (
-        <div key={n.name} style={s.neighborhoodCard(n.color)}>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", fontWeight: 700, color: COLORS.bark, marginBottom: "4px" }}>{n.name}</div>
-          <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.5 }}>{n.desc}</div>
-        </div>
-      ))}
-    </div>
-  );
+  <div style={s.section}>
+    <div style={s.sectionTitle}>Neighborhoods</div>
+    {NEIGHBORHOODS.map(n => (
+      <div key={n.name} style={s.neighborhoodCard(n.color)}>
+        <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", fontWeight: 700, color: COLORS.bark, marginBottom: "4px" }}>{n.name}</div>
+        <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.5, marginBottom: "10px" }}>{n.desc}</div>
+        <a href={n.maps} target="_blank" rel="noopener noreferrer" style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase", color: COLORS.turquoise, textDecoration: "none", borderBottom: `1px solid ${COLORS.turquoiseLight}` }}>View on Map →</a>
+      </div>
+    ))}
+  </div>
+);
 
 
   const renderAdmin = () => (
