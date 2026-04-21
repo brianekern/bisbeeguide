@@ -84,10 +84,13 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
 }, []);
 
   const fetchEvents = async () => {
-    const { data, error } = await supabase.from("events").select("*").order("created_at", { ascending: false });
-    if (!error) setEvents(data || []);
-    setLoading(false);
-  };
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 7);
+  await supabase.from("events").delete().lt("created_at", cutoff.toISOString());
+  const { data, error } = await supabase.from("events").select("*").order("created_at", { ascending: false });
+  if (!error) setEvents(data || []);
+  setLoading(false);
+};
 
   const fetchBulletins = async () => {
     const { data, error } = await supabase.from("bulletins").select("*").order("created_at", { ascending: false });
