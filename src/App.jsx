@@ -34,6 +34,7 @@ const YELP_LINKS = [
   { label: "Shopping", url: "https://www.google.com/maps/search/shopping+in+Bisbee+AZ" },
   { label: "Art Galleries", url: "https://www.google.com/maps/search/art+galleries+in+Bisbee+AZ" },
   { label: "Hotels", url: "https://www.google.com/maps/search/hotels+in+Bisbee+AZ" },
+  { label: "Desserts & Sweets", url: "https://www.google.com/maps/search/desserts+sweets+bakery+in+Bisbee+AZ" },
 ];
 
 const categoryColor = (cat) => {
