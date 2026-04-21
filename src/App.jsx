@@ -282,6 +282,21 @@ const renderAbout = () => (
         )}
       </div>
     ))}
+    <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.3rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "12px", marginTop: "8px", borderBottom: `1px solid ${COLORS.sandDark}`, paddingBottom: "8px" }}>Day Trips & Nearby</div>
+    {[
+      { name: "Kartchner Caverns", desc: "A living cave system tucked beneath the Whetstone Mountains — one of the best-preserved caverns in the world. Reserve tours well in advance.", maps: "https://www.google.com/maps/search/Kartchner+Caverns+State+Park+AZ" },
+      { name: "Chiricahua National Monument", desc: "An otherworldly forest of balanced rocks and volcanic spires rising from the Chiricahua Mountains. One of southeastern Arizona's most dramatic landscapes.", maps: "https://www.google.com/maps/search/Chiricahua+National+Monument+AZ" },
+      { name: "Portal & Cave Creek Canyon", desc: "A birder's paradise on the edge of the Chiricahuas. Cave Creek Canyon is considered one of the top birding spots in North America — elegant trogons, sulphur-bellied flycatchers, and more.", maps: "https://www.google.com/maps/search/Portal+Arizona+Cave+Creek+Canyon" },
+      { name: "Dragoon Mountains & Texas Canyon", desc: "The Dragoons were Cochise's stronghold — a labyrinth of granite boulders with deep Apache history. Texas Canyon along I-10 offers the same surreal geology from the highway.", maps: "https://www.google.com/maps/search/Texas+Canyon+Dragoon+Mountains+Arizona" },
+      { name: "Sonoita Wine Country", desc: "Arizona's most established wine region sits at 5,000 feet on the high grasslands north of the border. A dozen tasting rooms within a short drive of each other.", maps: "https://www.google.com/maps/search/Sonoita+wine+country+Arizona" },
+      { name: "Patagonia", desc: "A small art and birding town on the Santa Cruz River with a laid-back main street, excellent birding preserves, and a loyal community of artists and naturalists.", maps: "https://www.google.com/maps/search/Patagonia+Arizona" },
+    ].map(place => (
+      <div key={place.name} style={{ ...s.card, borderLeft: `4px solid ${COLORS.turquoise}`, marginBottom: "10px" }}>
+        <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1rem", fontWeight: 700, color: COLORS.bark, marginBottom: "4px" }}>{place.name}</div>
+        <div style={{ fontSize: "0.82rem", color: COLORS.dusk, lineHeight: 1.6, marginBottom: "10px" }}>{place.desc}</div>
+        <a href={place.maps} target="_blank" rel="noopener noreferrer" style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase", color: COLORS.turquoise, textDecoration: "none", borderBottom: `1px solid ${COLORS.turquoiseLight}` }}>View on Map →</a>
+      </div>
+    ))}
   </div>
 );
 
