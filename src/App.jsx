@@ -21,7 +21,7 @@ const NEIGHBORHOODS = [
   { name: "Tombstone Canyon", color: "#9E4E28", desc: "...", maps: "https://www.google.com/maps/search/Tombstone+Canyon+Bisbee+AZ" },
 ];
 
-const DAYS = ["today","monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+const DAYS = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
 const CATEGORIES = ["Tour","Music","Market","Art","Nightlife","Wellness","Food","Community"];
 const BULLETIN_CATEGORIES = ["Special","Event","Announcement","Popup"];
 
@@ -173,31 +173,34 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
     yelpBtn: { display: "inline-block", fontFamily: FONT_MONO, fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", padding: "10px 16px", borderRadius: "3px", background: COLORS.sand, border: `1px solid ${COLORS.sandDark}`, color: COLORS.bark, cursor: "pointer", marginRight: "8px", marginBottom: "8px", textDecoration: "none" },
   };
 
- const renderToday = () => (
-  <div style={s.section}>
-    <div style={s.sectionTitle}>Explore Bisbee</div>
-    <div style={{ marginBottom: "24px" }}>
-      {YELP_LINKS.map(link => (
-        <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={s.yelpBtn}>{link.label}</a>
+ const renderToday = () => {
+  const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  return (
+    <div style={s.section}>
+      <div style={s.sectionTitle}>Explore Bisbee</div>
+      <div style={{ marginBottom: "24px" }}>
+        {YELP_LINKS.map(link => (
+          <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={s.yelpBtn}>{link.label}</a>
+        ))}
+      </div>
+      <div style={s.sectionTitle}>Today in Bisbee</div>
+      {loading && <div style={s.emptyState}>Loading...</div>}
+      {!loading && events.filter(e => e.day === todayName).length === 0 && <div style={s.emptyState}>No events posted for today yet.</div>}
+      {events.filter(e => e.day === todayName).map(e => (
+        <div key={e.id} style={s.eventCard}>
+          <div style={s.eventStripe(e.category)} />
+          <div style={s.eventBody}>
+            <div style={s.tag(e.category)}>{e.category}</div>
+            <div style={s.eventTitle}>{e.title}</div>
+            <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
+            <div style={s.eventDesc}>{e.description}</div>
+            {e.url && <a href={e.url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase", color: COLORS.turquoise, textDecoration: "none", borderBottom: `1px solid ${COLORS.turquoiseLight}`, marginTop: "8px", display: "inline-block" }}>More Info →</a>}
+          </div>
+        </div>
       ))}
     </div>
-    <div style={s.sectionTitle}>Today in Bisbee</div>
-    {loading && <div style={s.emptyState}>Loading...</div>}
-    {!loading && events.filter(e => e.day === "today").length === 0 && <div style={s.emptyState}>No events posted for today yet.</div>}
-    {events.filter(e => e.day === "today").map(e => (
-      <div key={e.id} style={s.eventCard}>
-        <div style={s.eventStripe(e.category)} />
-        <div style={s.eventBody}>
-  <div style={s.tag(e.category)}>{e.category}</div>
-  <div style={s.eventTitle}>{e.title}</div>
-  <div style={s.eventMeta}>⏰ {e.time} &nbsp;·&nbsp; 📍 {e.location}</div>
-  <div style={s.eventDesc}>{e.description}</div>
-  {e.url && <a href={e.url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase", color: COLORS.turquoise, textDecoration: "none", borderBottom: `1px solid ${COLORS.turquoiseLight}`, marginTop: "8px", display: "inline-block" }}>More Info →</a>}
-</div>
-      </div>
-    ))}
-  </div>
-);
+  );
+};
   const renderCalendar = () => (
     <div style={s.section}>
       <div style={s.sectionTitle}>This Week</div>
