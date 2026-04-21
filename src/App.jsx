@@ -63,7 +63,7 @@ export default function BisbeeApp() {
   const [signupError, setSignupError] = useState("");
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [newBulletin, setNewBulletin] = useState({ message: "", category: "Special" });
-  const [newEvent, setNewEvent] = useState({ title: "", time: "", day: "today", category: "Community", location: "", description: "", url: "" });
+  const [newEvent, setNewEvent] = useState({ title: "", time: "", day: "monday", category: "Community", location: "", description: "", url: "" });
   const [editBulletin, setEditBulletin] = useState(null);
   const [resetMode, setResetMode] = useState(false);
 const [resetEmail, setResetEmail] = useState("");
@@ -133,7 +133,7 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
   const postEvent = async () => {
     if (!newEvent.title.trim()) return;
     await supabase.from("events").insert({ ...newEvent, business_id: adminUser.id });
-    setNewEvent({ title: "", time: "", day: "today", category: "Community", location: "", description: "", url: "" });
+    setNewEvent({ title: "", time: "", day: "monday", category: "Community", location: "", description: "", url: "" });
     fetchEvents();
   };
 
