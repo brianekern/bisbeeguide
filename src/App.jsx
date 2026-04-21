@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
+import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
 
 const FONT_DISPLAY = "'Playfair Display', Georgia, serif";
 const FONT_BODY = "'Libre Baskerville', Georgia, serif";
@@ -233,23 +234,56 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
     </div>
   );
 
-  const renderAbout = () => (
-    <div style={s.section}>
-      <div style={s.welcomeBox}>
-        <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.6rem", fontWeight: 700, marginBottom: "10px" }}>Welcome to Bisbee, Arizona</div>
-        <div style={{ fontSize: "0.9rem", lineHeight: 1.7, opacity: 0.95 }}>Tucked into the Mule Mountains of Cochise County at 5,300 feet, Bisbee is one of the most distinctive small towns in the American Southwest — a former copper mining boomtown turned arts enclave, perched above the Mexican border in the heart of the sky islands.</div>
+  const CLIMATE_DATA = [
+  { month: "Jan", high: 57, low: 34, precip: 1.1 },
+  { month: "Feb", high: 61, low: 37, precip: 0.9 },
+  { month: "Mar", high: 66, low: 41, precip: 0.8 },
+  { month: "Apr", high: 74, low: 47, precip: 0.4 },
+  { month: "May", high: 82, low: 54, precip: 0.3 },
+  { month: "Jun", high: 91, low: 62, precip: 0.6 },
+  { month: "Jul", high: 88, low: 66, precip: 3.8 },
+  { month: "Aug", high: 85, low: 64, precip: 3.9 },
+  { month: "Sep", high: 82, low: 59, precip: 2.1 },
+  { month: "Oct", high: 74, low: 50, precip: 1.2 },
+  { month: "Nov", high: 63, low: 39, precip: 0.8 },
+  { month: "Dec", high: 57, low: 34, precip: 1.0 },
+];
+
+const renderAbout = () => (
+  <div style={s.section}>
+    <div style={s.welcomeBox}>
+      <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.6rem", fontWeight: 700, marginBottom: "10px" }}>Welcome to Bisbee, Arizona</div>
+      <div style={{ fontSize: "0.9rem", lineHeight: 1.7, opacity: 0.95 }}>Tucked into the Mule Mountains of Cochise County at 5,300 feet, Bisbee is one of the most distinctive small towns in the American Southwest — a former copper mining boomtown turned arts enclave, perched above the Mexican border in the heart of the sky islands.</div>
+    </div>
+    {[
+      { title: "Getting Here", body: "Bisbee is 90 miles southeast of Tucson via I-10 and Hwy 80. The nearest commercial airports are Tucson International (TUS) and Douglas Municipal. No public transit — a car is essential in this terrain." },
+      { title: "Elevation & Climate", body: "At 5,300 ft, Bisbee stays significantly cooler than Tucson or Phoenix. Summers are mild with monsoon rains July–September. Winters can bring frost and occasional snow. Spring and fall are ideal." },
+      { title: "The Sky Islands", body: "Bisbee sits within one of North America's most biodiverse regions. The sky islands support remarkable wildlife: hummingbirds, coatis, javelinas, black bears, and some of the darkest night skies in the continental US." },
+    ].map(item => (
+      <div key={item.title} style={s.card}>
+        <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "8px" }}>{item.title}</div>
+        <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.6 }}>{item.body}</div>
+        {item.title === "Elevation & Climate" && (
+          <div style={{ marginTop: "16px" }}>
+            <div style={{ fontFamily: FONT_MONO, fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: COLORS.dusk, marginBottom: "12px" }}>Monthly Averages — Temp (°F) & Precipitation (in)</div>
+            <ResponsiveContainer width="100%" height={220}>
+              <ComposedChart data={CLIMATE_DATA} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+                <XAxis dataKey="month" tick={{ fontFamily: FONT_MONO, fontSize: 10, fill: COLORS.dusk }} />
+                <YAxis yAxisId="temp" domain={[20, 100]} tick={{ fontFamily: FONT_MONO, fontSize: 10, fill: COLORS.dusk }} />
+                <YAxis yAxisId="precip" orientation="right" domain={[0, 6]} tick={{ fontFamily: FONT_MONO, fontSize: 10, fill: COLORS.dusk }} />
+                <Tooltip contentStyle={{ fontFamily: FONT_MONO, fontSize: "0.72rem", border: `1px solid ${COLORS.sandDark}`, borderRadius: "3px" }} />
+                <Legend wrapperStyle={{ fontFamily: FONT_MONO, fontSize: "0.65rem" }} />
+                <Bar yAxisId="precip" dataKey="precip" name="Precip (in)" fill={COLORS.turquoiseLight} opacity={0.7} radius={[2,2,0,0]} />
+                <Line yAxisId="temp" type="monotone" dataKey="high" name="Avg High" stroke={COLORS.terracotta} strokeWidth={2} dot={false} />
+                <Line yAxisId="temp" type="monotone" dataKey="low" name="Avg Low" stroke={COLORS.turquoise} strokeWidth={2} dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
-      {[
-        { title: "Getting Here", body: "Bisbee is 90 miles southeast of Tucson via I-10 and Hwy 80. The nearest commercial airports are Tucson International (TUS) and Douglas Municipal. No public transit — a car is essential in this terrain." },
-        { title: "Elevation & Climate", body: "At 5,300 ft, Bisbee stays significantly cooler than Tucson or Phoenix. Summers are mild with monsoon rains July–September. Winters can bring frost and occasional snow. Spring and fall are ideal." },
-        { title: "The Sky Islands", body: "Bisbee sits within one of North America's most biodiverse regions. The sky islands support remarkable wildlife: hummingbirds, coatis, javelinas, black bears, and some of the darkest night skies in the continental US." },
-      ].map(item => (
-        <div key={item.title} style={s.card}>
-          <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1.1rem", fontWeight: 700, color: COLORS.terracottaDark, marginBottom: "8px" }}>{item.title}</div>
-          <div style={{ fontSize: "0.85rem", color: COLORS.dusk, lineHeight: 1.6 }}>{item.body}</div>
-        </div>
-      ))} </div>
-  );
+    ))}
+  </div>
+);
 
   const renderNeighborhoods = () => (
   <div style={s.section}>
