@@ -49,6 +49,7 @@ const categoryColor = (cat) => {
 };
 
 export default function BisbeeApp() {
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [view, setView] = useState("visitor");
   const [visitorTab, setVisitorTab] = useState("today");
   const [adminTab, setAdminTab] = useState("bulletin");
@@ -81,6 +82,15 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
     }
   });
   return () => subscription.unsubscribe();
+}, []);
+
+useEffect(() => {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  const dismissed = localStorage.getItem("installBannerDismissed");
+  if (isIOS && !isStandalone && !dismissed) {
+    setShowInstallBanner(true);
+  }
 }, []);
 
   const fetchEvents = async () => {
@@ -227,6 +237,30 @@ const [isRecoverySession, setIsRecoverySession] = useState(false);
       ))}
     </div>
   );
+
+  const renderInstallBanner = () => (
+  <div style={{
+    position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 999,
+    background: COLORS.bark, color: COLORS.sand,
+    padding: "14px 16px 20px", boxShadow: "0 -2px 12px rgba(0,0,0,0.3)",
+    fontFamily: FONT_BODY,
+  }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
+      <div style={{ fontFamily: FONT_DISPLAY, fontSize: "1rem", fontWeight: 700 }}>
+        Add Bisbee Guide to your Home Screen
+      </div>
+      <button onClick={() => {
+        setShowInstallBanner(false);
+        localStorage.setItem("installBannerDismissed", "true");
+      }} style={{ background: "transparent", border: "none", color: COLORS.sandDark, fontSize: "1.2rem", cursor: "pointer", padding: "0 0 0 12px", lineHeight: 1 }}>✕</button>
+    </div>
+    <div style={{ fontSize: "0.82rem", color: COLORS.sandDark, lineHeight: 1.6 }}>
+      <span style={{ display: "block", marginBottom: "4px" }}>1. Tap the <strong style={{ color: COLORS.sand }}>•••</strong> button at the bottom of Safari</span>
+      <span style={{ display: "block", marginBottom: "4px" }}>2. Tap <strong style={{ color: COLORS.sand }}>Share</strong>, then <strong style={{ color: COLORS.sand }}>View More</strong></span>
+      <span style={{ display: "block" }}>3. Tap <strong style={{ color: COLORS.sand }}>Add to Home Screen</strong></span>
+    </div>
+  </div>
+);
 
   const renderBulletins = () => (
     <div style={s.section}>
@@ -560,6 +594,7 @@ const renderLogin = () => {
         </div>
       )}
       {view === "admin" && (adminUser ? renderAdmin() : renderLogin())}
+      {showInstallBanner && renderInstallBanner()}
     </div>
   );
 }
